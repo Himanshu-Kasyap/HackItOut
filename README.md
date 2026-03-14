@@ -2,6 +2,7 @@
 
 A full-stack climate analytics dashboard for exploring climate datasets, visualizing global trends, and generating AI-powered insights.
 
+HERE IS THE SAMPLE DATASET :- https://drive.google.com/file/d/1G32CdMAqYNVWYmkkwNBPkFWEik3xTZvU/view?usp=drive_link
 ---
 
 ## Tech Stack
