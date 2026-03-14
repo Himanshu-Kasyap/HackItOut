@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ClimateLens AI</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+</head>
+<body>
+
+<!-- ── Sidebar ─────────────────────────────────────────────────────────────── -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <span class="logo-icon">🌍</span>
+    <span class="logo-text">ClimateLens AI</span>
+  </div>
+
+  <div class="sidebar-section">
+    <label class="sidebar-label">Upload Dataset</label>
+    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
+      <span class="upload-icon">📁</span>
+      <span id="uploadZoneText">Click or drag CSV / NetCDF</span>
+    </div>
+    <input type="file" id="fileInput" accept=".csv,.nc,.nc4" style="display:none" onchange="onFileSelected(this)" />
+    <button class="btn-primary" id="uploadBtn" onclick="uploadDataset()" disabled>⬆ Upload</button>
+    <button class="btn-reset" onclick="resetDataset()">↺ Use Sample Data</button>
+    <div id="uploadStatus" class="status-msg"></div>
+  </div>
+
+  <div class="sidebar-section">
+    <label class="sidebar-label">Climate Variable</label>
+    <select id="variableSelect" onchange="onVariableChange()">
+      <option value="temperature">Temperature (°C)</option>
+      <option value="precipitation">Precipitation (mm)</option>
+      <option value="wind_speed">Wind Speed (m/s)</option>
+      <option value="humidity">Humidity (%)</option>
+    </select>
+  </div>
+
+  <div class="sidebar-section">
+    <label class="sidebar-label">Year Filter</label>
+    <input type="number" id="yearFilter" placeholder="e.g. 2020" min="1900" max="2100" />
+    <label class="sidebar-label" style="margin-top:8px">Month Filter</label>
+    <select id="monthFilter">
+      <option value="">All Months</option>
+      <option value="1">January</option><option value="2">February</option>
+      <option value="3">March</option><option value="4">April</option>
+      <option value="5">May</option><option value="6">June</option>
+      <option value="7">July</option><option value="8">August</option>
+      <option value="9">September</option><option value="10">October</option>
+      <option value="11">November</option><option value="12">December</option>
+    </select>
+  </div>
+
+  <div class="sidebar-section">
+    <label class="sidebar-label">Location</label>
+    <div class="city-search-wrap" id="citySearchWrap">
+      <input type="text" id="citySearchInput" class="city-search-input" placeholder="Search city..." autocomplete="off" />
+      <div class="city-dropdown" id="cityDropdown"></div>
+      <input type="hidden" id="citySelect" value="" />
+    </div>
+    <div id="latLonSelector" style="display:none; margin-top:6px;">
+      <select id="latLonSelect">
+        <option value="">-- Select Location --</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <label class="sidebar-label">Compare Years</label>
+    <input type="number" id="compareYear1" placeholder="Year 1 (e.g. 2000)" />
+    <input type="number" id="compareYear2" placeholder="Year 2 (e.g. 2020)" style="margin-top:6px" />
+  </div>
+
+  <div class="sidebar-section">
+    <label class="sidebar-label">Predict Years Ahead</label>
+    <input type="number" id="yearsAhead" value="10" min="1" max="50" />
+  </div>
+
+  <button class="btn-run" onclick="runAll()">▶ Run Analysis</button>
+</aside>
+
+<!-- ── Main Panel ──────────────────────────────────────────────────────────── -->
+<main class="main-panel">
+
+  <header class="top-bar">
+    <h1 class="app-title">🌍 ClimateLens AI</h1>
+    <p class="app-subtitle">Climate Data Visualization &amp; AI Insights Platform</p>
+    <div id="datasetBadge" class="dataset-badge">📂 sample_climate_data.csv</div>
+  </header>
+
+  <!-- Global Heatmap -->
+  <section class="card full-width">
+    <div class="card-header">
+      <span class="card-icon">🗺️</span>
+      <div>
+        <div class="card-title">Global Climate Heatmap</div>
+        <div class="card-desc">Spatial distribution of climate variables across geographic regions</div>
+      </div>
+    </div>
+    <div id="heatmapChart" class="chart-container"></div>
+  </section>
+
+  <!-- Time Series + AI Insights -->
+  <div class="card-row">
+    <section class="card">
+      <div class="card-header">
+        <span class="card-icon">📈</span>
+        <div>
+          <div class="card-title">Location-Based Time Series</div>
+          <div class="card-desc">Climate variable trend over time at a selected location</div>
+        </div>
+      </div>
+      <div id="timeSeriesChart" class="chart-container"></div>
+    </section>
+
+    <section class="card">
+      <div class="card-header">
+        <span class="card-icon">🤖</span>
+        <div>
+          <div class="card-title">AI-Generated Insights</div>
+          <div class="card-desc">Automated pattern detection, anomalies, and trend analysis</div>
+        </div>
+      </div>
+      <div id="insightsPanel" class="insights-panel">
+        <p class="insight-placeholder">Run analysis to generate AI insights...</p>
+      </div>
+    </section>
+  </div>
+
+  <!-- Comparison Mode -->
+  <section class="card full-width">
+    <div class="card-header">
+      <span class="card-icon">⚖️</span>
+      <div>
+        <div class="card-title">Climate Comparison Mode</div>
+        <div class="card-desc">Side-by-side comparison of climate distribution across two time periods</div>
+      </div>
+    </div>
+    <div class="comparison-row">
+      <div id="compareChart1" class="chart-container half"></div>
+      <div id="compareChart2" class="chart-container half"></div>
+    </div>
+  </section>
+
+  <!-- Future Predictions -->
+  <section class="card full-width">
+    <div class="card-header">
+      <span class="card-icon">🔮</span>
+      <div>
+        <div class="card-title">Future Climate Predictions</div>
+        <div class="card-desc">Linear regression model predicting future climate variable trends</div>
+      </div>
+    </div>
+    <div id="predictionChart" class="chart-container"></div>
+    <div id="predictionInfo" class="prediction-info"></div>
+  </section>
+
+</main>
+
+<!-- Loading overlay -->
+<div id="loadingOverlay" class="loading-overlay hidden">
+  <div class="spinner"></div>
+  <p>Analyzing climate data...</p>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
