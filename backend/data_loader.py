@@ -12,16 +12,18 @@ def load_csv(filepath):
 def load_dataset(filename=None):
     if filename:
         path = os.path.join(UPLOAD_FOLDER, filename)
+        ext = os.path.splitext(path)[1].lower()
+        if ext == '.csv':
+            return load_csv(path)
+        elif ext in ('.nc', '.nc4'):
+            return load_netcdf(path)
+        else:
+            raise ValueError(f"Unsupported file format: {ext}")
     else:
-        path = os.path.join(UPLOAD_FOLDER, 'sample_climate_data.csv')
-
-    ext = os.path.splitext(path)[1].lower()
-    if ext == '.csv':
-        return load_csv(path)
-    elif ext in ('.nc', '.nc4'):
-        return load_netcdf(path)
-    else:
-        raise ValueError(f"Unsupported file format: {ext}")
+        # Load both sample parts and combine them
+        part1 = os.path.join(UPLOAD_FOLDER, 'sample_climate_data_part1.csv')
+        part2 = os.path.join(UPLOAD_FOLDER, 'sample_climate_data_part2.csv')
+        return pd.concat([load_csv(part1), load_csv(part2)], ignore_index=True)
 
 def load_netcdf(filepath):
     try:

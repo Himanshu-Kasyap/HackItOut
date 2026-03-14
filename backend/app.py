@@ -85,7 +85,7 @@ def reset_dataset():
             'year_max': year_max,
             'cities': cities,
             'lat_lon_points': [],
-            'active_file': 'sample_climate_data.csv',
+            'active_file': 'sample_climate_data_part1.csv + part2.csv',
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -105,7 +105,7 @@ def get_dataset_info():
             'year_max': year_max,
             'cities': cities,
             'lat_lon_points': lat_lon_points,
-            'active_file': _state.get('active_file') or 'sample_climate_data.csv',
+            'active_file': _state.get('active_file') or 'sample_climate_data_part1.csv + part2.csv',
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
