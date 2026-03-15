@@ -1,0 +1,4 @@
+year,month,week,city,latitude,longitude,temperature,precipitation,wind_speed,humidity,pressure
+1990,1,1,New York,40.71,-74.01,-6.65,15.97,11.65,67.14,1010.19
+1990,1,1,Los Angeles,34.05,-118.24,-5.42,21.35,10.77,58.78,1012.47
+1990,1,1,Chicago,41.88,-87.63,-6.62,26.43,14.39,59.57,1005.25
