@@ -9,10 +9,12 @@ from data_loader import (load_dataset, get_available_variables, get_year_range,
 from climate_analysis import get_heatmap_data, get_time_series, get_comparison_data, get_ai_insights
 from ml_model import predict_future
 
-app = Flask(__name__, static_folder='../frontend', static_url_path='')
-CORS(app)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+FRONTEND_DIR = os.path.join(BASE_DIR, '..', 'frontend')
+DATASETS_DIR = os.path.join(BASE_DIR, '..', 'datasets')
 
-DATASETS_DIR = os.path.join(os.path.dirname(__file__), '..', 'datasets')
+app = Flask(__name__, static_folder=os.path.normpath(FRONTEND_DIR), static_url_path='')
+CORS(app)
 ALLOWED_EXTENSIONS = {'csv', 'nc', 'nc4'}
 
 # Always start with the sample dataset — never inherit a stale uploaded file
@@ -31,7 +33,14 @@ def get_df():
 
 @app.route('/')
 def index():
-    return send_from_directory('../frontend', 'index.html')
+    return send_from_directory(os.path.normpath(FRONTEND_DIR), 'index.html')
+
+@app.route('/<path:path>')
+def static_files(path):
+    full = os.path.join(os.path.normpath(FRONTEND_DIR), path)
+    if os.path.exists(full):
+        return send_from_directory(os.path.normpath(FRONTEND_DIR), path)
+    return send_from_directory(os.path.normpath(FRONTEND_DIR), 'index.html')
 
 
 # ── API endpoints ─────────────────────────────────────────────────────────────
@@ -181,4 +190,3 @@ def future_prediction():
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
-
